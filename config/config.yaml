@@ -1,0 +1,64 @@
+# Analysis configuration — From first author to senior author: the gendered pipeline
+# Preregistration: https://doi.org/10.17605/OSF.IO/CNXS3
+# Any change to this file after annotation lock = protocol deviation (document on OSF).
+
+preregistration_doi: "10.17605/OSF.IO/CNXS3"
+openalex_snapshot_id: "2026-09-05 entry-window pull (MD5 81519b3f418d2ba9d51f086df4dd9ce6)"  # recorded post-hoc 2026-09-07; see deviation #16
+annotation_lock: true            # set true when reference-standard annotation is locked
+
+cohort:
+  index_sources:
+    EHJ: "S181568219"
+    Circulation: "S116251202"
+    JACC: "S60865174"
+  entry_years_full: [2005, 2006, 2007, 2008, 2009, 2010]
+  entry_years_primary: [2005, 2006, 2007, 2008, 2009]   # primary estimand cohort (>=15y follow-up)
+  academic_age_max: 5
+  followup_end: "2024-12-31"
+  min_indexing_lag_months: 12
+
+article_cleaning:
+  doc_types_keep: ["article"]
+  issue_anomaly_factor: 2.0        # flag issues with >= 2x journal-year median article count
+  empty_issue_label_exempt: true   # metadata-missing records must not form spurious clusters
+  manual_rescue: ["EHJ:2008:7"]    # legitimate oversized issue rescued pre-registration
+  title_patterns_exclude:
+    - "^editorial footnote"
+    - "^letters? by"
+    - "^regarding article"
+    - "[:\\-]\\s*reply\\b"
+    - "^reply\\b"
+    - "^response to\\b"
+  cjk_abstract_screen: true        # misindexed CJK-script records
+
+outcome:
+  definition: "first post-index original article as last author, PubMed-indexed, 2-30 authors, no consortium byline"
+  min_authors: 2
+  max_authors: 30
+  inactivity_gap_years: 5          # A0: adjacent-year difference >=5; four complete empty calendar years
+  eligibility: "OpenAlex type and title screening with targeted PubMed, Crossref, or publisher verification; case reports, meta-analyses, and research letters containing original data, methods, or results are eligible; other letters, reviews, corrections, and editorials are excluded"
+  tiers:
+    tier1_entry_journals: ["S181568219", "S116251202", "S60865174"]
+    tier1_general: ["NEJM", "JAMA", "Lancet", "BMJ", "Nature Medicine"]
+    tier2: "other SJR-2024 Cardiology and Cardiovascular Medicine Q1"
+    tier3: "all other PubMed-indexed"
+
+gender:
+  hierarchy: ["namsor_or_genderapi", "genderize", "manual_cn_kr_jp"]
+  core_reference_n: 800
+  special_candidate_set: "frozen high-recall CN/KR/JP candidates"
+  calibration: ["isotonic", "platt"]  # selected pre-analysis by reference-standard Brier score
+
+model:
+  type: "cause-specific Royston-Parmar"
+  baseline_df: 5
+  gender_time_interaction_df: 3
+  df_sensitivity: [3, 5, 7]
+  adjustment_set: ["entry_year", "index_journal", "inst_country", "inst_tier",
+                   "academic_age", "preentry_pubs", "preentry_citations",
+                   "preentry_hindex", "preentry_coauthors", "intl_collab_share"]
+  bootstrap_B: 1000                 # institution-level cluster bootstrap (outer)
+  imputations_M: [20, 50]           # calibrated MI for probabilistic gender (inner)
+  convergence_fail_threshold: 0.05  # if >5% bootstrap-imputation cells fail, flag and report df=3 as primary
+  alpha: 0.05
+  multiplicity: "gatekeeping: primary RD -> secondaries, Bonferroni alpha/3 within gate"

@@ -1,0 +1,45 @@
+# Data, annotations, and individual-level records
+data/*
+!data/README.md
+*.parquet
+*.pkl
+*.rds
+*.RData
+*.jsonl
+*.jsonl.gz
+
+# Analysis outputs and temporary files
+results/
+work_tmp/
+outputs/
+*.csv
+!config/entry_eligibility_adjudicated_template.csv
+!config/outcome_eligibility_adjudicated_template.csv
+*.xlsx
+*.xls
+*.pdf
+*.png
+*.tif
+*.tiff
+*.svg
+
+# Credentials and local configuration
+.env
+.env.*
+*_secret*
+*_token*
+*api_key*
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# R and editors
+.Rhistory
+.Rproj.user/
+.DS_Store
+Thumbs.db
